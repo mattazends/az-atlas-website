@@ -1,7 +1,8 @@
 const CONFIG={
   phoneDisplay:"(520) 230-9270",
   phoneTel:"+15202309270",
-  formEndpoint:"" // TODO: GHL / Zapier / Make webhook URL. Empty = demo mode
+  web3formsKey:"" // Web3Forms access key: leads are emailed to the address it was created with
+  ,formEndpoint:""
 };
 const IMG={
 "barafter2":"/img/barafter2.webp",
@@ -297,7 +298,14 @@ const Form=(()=>{const state={step:0,service:null,size:null,timeline:null,budget
   if(bad){const f=$(".fld.err input,.fld.err textarea",stage);f&&f.focus();card.animate([{transform:"translateX(0)"},{transform:"translateX(-8px)"},{transform:"translateX(8px)"},{transform:"translateX(0)"}],{duration:320});return}
   const data={service:lbl(state.service),size:state.size,timeline:state.timeline,budget:state.budget,name:$("#fName",stage).value.trim(),phone:$("#fPhone",stage).value.trim(),email:$("#fEmail",stage).value.trim(),location:$("#fLoc",stage).value.trim(),description:$("#fDesc",stage).value.trim(),photos:state.files.length,design:state.design||"",source:location.href};
   state.name=data.name;
-  if(CONFIG.formEndpoint){try{const fd=new FormData();Object.entries(data).forEach(([k,v])=>fd.append(k,v??""));state.files.forEach(f=>fd.append("photos",f));await fetch(CONFIG.formEndpoint,{method:"POST",body:fd})}catch(err){console.warn("Form send failed",err)}}else console.log("[demo] estimate request",data);
+  const sb=$("button[type=submit]",stage);if(sb){sb.disabled=true;sb.style.opacity=".6"}
+  let ok=true;
+  if(CONFIG.web3formsKey){try{const r=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({
+    access_key:CONFIG.web3formsKey,subject:"New estimate request: "+(data.service||"Project")+" ("+data.location+")",from_name:"AZ Atlas Website",replyto:data.email,botcheck:"",
+    "Name":data.name,"Phone":data.phone,"Email":data.email,"Project location":data.location,"Service":data.service||"Not sure","Project size":data.size||"-","Timeline":data.timeline||"-","Budget":data.budget||"-","3D design":data.design||"-","Description":data.description,"Photos":data.photos?data.photos+" photo(s) selected. Ask the customer to text them over.":"None","Page":data.source})});
+    const j=await r.json().catch(()=>({}));ok=r.ok&&j.success!==false}catch(err){ok=false;console.warn("Form send failed",err)}}
+  else if(CONFIG.formEndpoint){try{const fd=new FormData();Object.entries(data).forEach(([k,v])=>fd.append(k,v??""));state.files.forEach(f=>fd.append("photos",f));await fetch(CONFIG.formEndpoint,{method:"POST",body:fd})}catch(err){console.warn("Form send failed",err)}}else console.log("[demo] estimate request",data);
+  if(!ok){if(sb){sb.disabled=false;sb.style.opacity=""}let m=$(".ferr",stage);if(!m){m=document.createElement("p");m.className="ferr";m.style.cssText="margin-top:12px;color:#b13824;font-weight:600;font-size:14.5px";stage.appendChild(m)}m.innerHTML=`That didn't send. Please try again or call <a data-tel style="text-decoration:underline"><span data-phone></span></a>.`;setContacts(m);return}
   go(1)});
  f3d.addEventListener("mousemove",e=>{if(matchMedia("(hover:none)").matches)return;const r=f3d.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;f3d.style.setProperty("--ry",((x-.5)*8).toFixed(2)+"deg");f3d.style.setProperty("--rx",((.5-y)*7).toFixed(2)+"deg");card.style.setProperty("--mx",x*100+"%");card.style.setProperty("--my",y*100+"%")});
  f3d.addEventListener("mouseleave",()=>{f3d.style.setProperty("--ry","0deg");f3d.style.setProperty("--rx","0deg")});
