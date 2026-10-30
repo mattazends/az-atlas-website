@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://az-atlas-website.mattshahriyari.workers.dev/sitemap.xml
+Sitemap: https://azatlasbuilder.com/sitemap.xml
