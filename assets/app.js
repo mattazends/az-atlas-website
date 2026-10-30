@@ -1,8 +1,8 @@
 const CONFIG={
   phoneDisplay:"(520) 230-9270",
   phoneTel:"+15202309270",
-  web3formsKey:"" // Web3Forms access key: leads are emailed to the address it was created with
-  ,formEndpoint:""
+  leadEndpoint:"/api/lead" // Cloudflare Worker that emails each request (with photos) via Resend
+  ,web3formsKey:"",formEndpoint:""
 };
 const IMG={
 "barafter2":"/img/barafter2.webp",
@@ -257,6 +257,7 @@ const RING=HOME&&(()=>{const view=$("#ringView"),ring=$("#ring");
 })();
 
 /* ---------- form ---------- */
+async function shrink(file){try{if(!file.type||!file.type.startsWith("image/"))return file;const bmp=await createImageBitmap(file);const sc=Math.min(1,1800/Math.max(bmp.width,bmp.height));const c=document.createElement("canvas");c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));return b||file}catch(e){return file}}
 const Form=(()=>{const state={step:0,service:null,size:null,timeline:null,budget:null,files:[],locked:false,design:null};
  const host=document.createElement("div");
  host.innerHTML=`<div class="f3d"><div class="ghost g2"></div><div class="ghost g1"></div><form class="fcard" novalidate><div class="fhead"><div class="t"><img data-k="logo" data-eager alt=""><div><b class="fTitle">Request a Project Estimate</b></div></div><span class="fstepn">Step 1 of 4</span></div><div class="fprog"><i></i><i></i><i></i><i></i></div><div class="fstage"></div></form></div>`;
@@ -300,7 +301,10 @@ const Form=(()=>{const state={step:0,service:null,size:null,timeline:null,budget
   state.name=data.name;
   const sb=$("button[type=submit]",stage);if(sb){sb.disabled=true;sb.style.opacity=".6"}
   let ok=true;
-  if(CONFIG.web3formsKey){try{const r=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({
+  if(CONFIG.leadEndpoint&&location.protocol.startsWith("http")){try{const fd=new FormData();Object.entries(data).forEach(([k,v])=>{if(k!=="photos")fd.append(k,v??"")});fd.append("company_website","");
+    for(const f of state.files.slice(0,8))fd.append("photos",await shrink(f),(f.name||"photo").replace(/\.[^.]+$/,"")+".jpg");
+    const r=await fetch(CONFIG.leadEndpoint,{method:"POST",body:fd});const j=await r.json().catch(()=>({}));ok=r.ok&&j.ok!==false}catch(err){ok=false;console.warn("Form send failed",err)}}
+  else if(CONFIG.web3formsKey){try{const r=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({
     access_key:CONFIG.web3formsKey,subject:"New estimate request: "+(data.service||"Project")+" ("+data.location+")",from_name:"AZ Atlas Website",replyto:data.email,botcheck:"",
     "Name":data.name,"Phone":data.phone,"Email":data.email,"Project location":data.location,"Service":data.service||"Not sure","Project size":data.size||"-","Timeline":data.timeline||"-","Budget":data.budget||"-","3D design":data.design||"-","Description":data.description,"Photos":data.photos?data.photos+" photo(s) selected. Ask the customer to text them over.":"None","Page":data.source})});
     const j=await r.json().catch(()=>({}));ok=r.ok&&j.success!==false}catch(err){ok=false;console.warn("Form send failed",err)}}

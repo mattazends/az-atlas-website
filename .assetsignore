@@ -1,4 +1,5 @@
 wrangler.jsonc
 .git
 .assetsignore
+worker.js
 node_modules
