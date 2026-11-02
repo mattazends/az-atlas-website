@@ -989,3 +989,83 @@ img[data-k]{opacity:1}
 .foot2 .cols{display:flex;flex-wrap:wrap;gap:0 26px}
 @media (max-width:1080px){.foot2{grid-template-columns:1fr 1fr}}
 @media (max-width:640px){.foot2{grid-template-columns:1fr}.offices a{flex-direction:column;align-items:flex-start;gap:4px}}
+
+/* ================= SHARP PASS: flatter, squarer, editorial ================= */
+:root{--r1:3px;--r2:6px;--r3:10px}
+/* buttons: flat, squared, no glow */
+.btn{border-radius:var(--r2);min-height:52px;letter-spacing:-.005em;font-weight:600}
+.btn-sm{min-height:42px}
+.btn-red{background:var(--red);box-shadow:none}
+.btn-red:hover{background:#7a1e12;box-shadow:none}
+.btn-glass{background:transparent;border:1px solid rgba(255,255,255,.55);backdrop-filter:none;-webkit-backdrop-filter:none}
+.btn-glass:hover{background:rgba(255,255,255,.08)}
+.btn-line{background:transparent;border:1px solid var(--ink);color:var(--ink)}
+.btn-line:hover{background:var(--ink);color:#fff}
+.links>a,.links>.dd>button{border-radius:var(--r1)}
+.burger{border-radius:var(--r2);background:var(--ink);border-color:var(--ink);color:#fff}
+/* menus + panels */
+.mega{border-radius:var(--r3);box-shadow:0 0 0 1px var(--line),0 24px 48px -28px rgba(18,13,11,.35)}
+.mega a,.mega .mi,.mega .mega-foot,.mnav .msvc a,.mnav .msvc img{border-radius:var(--r1)}
+/* form */
+.fcard,.f3d .ghost{border-radius:var(--r3);box-shadow:0 0 0 1px var(--line2)}
+.fcard::before{border-radius:inherit}
+.tile,.tiles .tile{border-radius:var(--r2)}
+.chip,.svc-pre,.real,.pill{border-radius:var(--r1)}
+.fld input,.fld textarea,.drop,.drop .ic,.thumbs img,.sizes img{border-radius:var(--r2);box-shadow:none}
+.fprog i{border-radius:0}
+/* media: crisp corners, no floating shadows */
+.ba-stage,.ba-screen,.scard,.chap-media,.studio-stage,.studio-panel,.gi,.gprev .g,.sp-gal figure,.art-fig,.lb img,.rcard,.inset,.fpanel,.svc-note{border-radius:var(--r2);box-shadow:none}
+.scard .cap,.gi figcaption,.srow::before,.srow .si,.badge,.badge .bi,.fl,.design-chip,.design-chip b,.st-nogl p,.st-tabs,.st-tabs button,.seg button,.xt button{border-radius:var(--r1)}
+.fl{box-shadow:none}
+/* little labels: square tags instead of glass pills */
+.gprev .g .cap,.gprev .g .live,.ba-lbl,.inset span,.fpanel li,.st-tag,.st-hint,.slot-tag,.size-strip i{border-radius:var(--r1);box-shadow:none}
+.gprev .g .cap{background:rgba(14,9,7,.78);backdrop-filter:none;-webkit-backdrop-filter:none;font-weight:560}
+.ba-modes,.ba-modes button,.ba-modes .knob,.st-stages,.st-stages button,.st-light,.st-light button,.filters button,.ba-tab{border-radius:var(--r1)}
+.ba-item{border-radius:var(--r2)}
+.ba-item .th{border-radius:var(--r1)}
+/* tiers: ruled columns, not cards */
+.tiers{gap:0;border-top:1px solid var(--ink)}
+.tier{border-radius:0;background:transparent;box-shadow:none;padding:28px 28px 8px 0}
+.tier+.tier{padding-left:28px;border-left:1px solid var(--line2)}
+.tier:hover{transform:none;box-shadow:none}
+@media (max-width:900px){.tier+.tier{padding-left:0;border-left:0;border-top:1px solid var(--line2)}.tier{padding:22px 0 10px}}
+/* related links: ruled list with arrows instead of pill chips */
+.others{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;border-top:1px solid var(--line2)}
+.others a{border-radius:0;box-shadow:none;background:transparent;min-height:50px;padding:0;border-bottom:1px solid var(--line2);justify-content:space-between;font-size:15.5px;font-weight:560}
+.others a::after{content:"\2192";opacity:.45;transition:transform .25s,opacity .25s}
+.others a:hover{background:transparent;color:var(--red);box-shadow:none}
+.others a:hover::after{transform:translateX(4px);opacity:1}
+@media (max-width:520px){.others{grid-template-columns:minmax(0,1fr)}}
+/* guides/areas cards -> ruled index */
+.hub-grid,.offices{gap:0;border-top:1px solid var(--line2)}
+.hub-grid a,.offices a{border-radius:0;background:transparent;box-shadow:none;border-bottom:1px solid var(--line2);padding:20px 4px}
+.hub-grid{column-gap:32px}
+.hub-grid a:hover,.offices a:hover{transform:none;box-shadow:none;background:transparent}
+.hub-grid a:hover b,.offices a:hover{color:var(--red)}
+.art-note{border-radius:0;background:transparent;box-shadow:none;border-left:3px solid var(--clay);padding:6px 0 6px 20px}
+.art-side .card{border-radius:var(--r2);box-shadow:none;border:1px solid var(--line2);background:transparent}
+.art-fig{aspect-ratio:3/2}
+/* FAQ: plain plus, no circles */
+.qa .pm{border-radius:0;box-shadow:none;width:20px;height:20px}
+.qa.open .pm{background:transparent;color:var(--red)}
+.qa{border-bottom-color:var(--line2)}
+.faq-grid .qa:first-child,.art-faq .qa:first-of-type{border-top:1px solid var(--line2)}
+/* about: straight photo grid instead of tilted polaroids */
+.collage{display:grid;grid-template-columns:1.25fr 1fr;grid-template-rows:1fr 1fr;gap:10px;height:clamp(440px,44vw,560px);perspective:none}
+.collage .c{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;transform:none!important;border:0;border-radius:var(--r2);box-shadow:none}
+.collage .c1{grid-row:1/3}
+.collage .c4{display:none}
+.lic{left:0!important;right:auto!important;top:auto!important;bottom:0!important;border-radius:0 var(--r2) 0 var(--r2);box-shadow:none;background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none}
+/* reviews hidden until real Google reviews are added */
+#reviews{display:none}
+/* mobile bar: flush, square */
+.mbar{left:0;right:0;bottom:0;border-radius:0;padding:8px 10px max(8px,env(safe-area-inset-bottom));gap:8px;box-shadow:none;border-top:1px solid rgba(255,255,255,.08)}
+.mbar a{border-radius:var(--r2)}
+/* 3D studio controls */
+.st-range::-webkit-slider-runnable-track,.st-range::-moz-range-track{border-radius:0}
+.st-tag{box-shadow:none}
+.sp-gal figure:last-child:nth-child(even){grid-column:1/-1;aspect-ratio:16/9}
+/* type: a touch tighter and crisper */
+.h2{letter-spacing:-.04em}
+.lead{color:#5e524b}
+.eyebrow{letter-spacing:.16em}
