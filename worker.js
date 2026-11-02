@@ -58,6 +58,56 @@ async function handleLead(req, env) {
   return json({ ok: true });
 }
 
+
+// ---- old WordPress URLs -> new pages (301) so existing rankings carry over
+const OLD = {
+  "/about-us/": "/", "/contact-us/": "/", "/gallery/": "/", "/arizona-projects/": "/", "/home/": "/",
+  "/blog/": "/guides/", "/services/": "/guides/",
+  "/bathroom-remodel/": "/bathroom-remodel-tucson/",
+  "/kitchen-remodel/": "/kitchen-remodel-tucson/",
+  "/drywall-repair-services/": "/home-repair-contractor-tucson/",
+  "/countertop-installation-services/": "/kitchen-remodel-tucson/",
+  "/stucco-repair/": "/stucco-contractor-tucson/",
+  "/custom-homes-am/": "/custom-homes-tucson/", "/custom-homes/": "/custom-homes-tucson/",
+  "/cabinet-installation/": "/custom-cabinets-tucson/",
+  "/flooring-installation/": "/home-remodeling-tucson/",
+  "/interior-exterior-painting/": "/home-remodeling-tucson/",
+  "/roofing-repairs/": "/roofing-tucson/", "/roofing/": "/roofing-tucson/",
+  "/framing/": "/framing-contractor-tucson/",
+  "/2026/10/16/what-does-a-kitchen-remodel-in-tucson-typically-involve/": "/kitchen-remodel-tucson/",
+  "/2026/09/04/tucson-home-remodeling-permits-explained/": "/home-remodeling-tucson/",
+  "/2026/08/06/home-remodeling-checklist-for-tucson-homeowners-a-primary-guide/": "/home-remodeling-tucson/",
+  "/2026/09/01/building-a-custom-home-in-tucson-step-by-step-guide/": "/custom-home-building-process-tucson/",
+  "/2026/07/21/how-to-choose-the-best-general-contractor-in-tucson/": "/hiring-a-contractor-arizona-roc-license/",
+  "/2026/10/13/making-a-tucson-bathroom-more-functional-without-adding-more-space/": "/bathroom-remodel-tucson/",
+};
+const KEYS = [
+  [/casita|adu|guest-?house|in-?law/, "/home-additions-casitas-tucson/"],
+  [/addition/, "/home-additions-casitas-tucson/"],
+  [/custom-?home|new-?home|build(ing)?-a-(custom-)?home/, "/custom-homes-tucson/"],
+  [/kitchen|countertop/, "/kitchen-remodel-tucson/"],
+  [/bath|shower|tub/, "/bathroom-remodel-tucson/"],
+  [/stucco/, "/stucco-contractor-tucson/"],
+  [/roof/, "/roofing-tucson/"],
+  [/cabinet/, "/custom-cabinets-tucson/"],
+  [/deck|patio|pergola/, "/deck-builder-tucson/"],
+  [/fram/, "/framing-contractor-tucson/"],
+  [/structur|beam|foundation/, "/structural-repair-tucson/"],
+  [/drywall|repair|handyman/, "/home-repair-contractor-tucson/"],
+  [/remodel|renovat|floor|paint/, "/home-remodeling-tucson/"],
+  [/contractor|hire|hiring|licen/, "/hiring-a-contractor-arizona-roc-license/"],
+];
+function oldRedirect(path) {
+  let p = path.toLowerCase();
+  if (!p.endsWith("/") && !/\.[a-z0-9]+$/.test(p)) p += "/";
+  if (OLD[p]) return OLD[p];
+  const wpish = /^\/(20\d\d\/|category\/|tag\/|author\/|page\/|blog\/|feed\/|comments\/)/.test(p);
+  for (const [re, to] of KEYS) if (re.test(p)) return to;
+  if (wpish) return "/guides/";
+  if (/^\/(wp-|xmlrpc|index\.php)/.test(p)) return "/";
+  return null;
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -65,6 +115,15 @@ export default {
       if (req.method !== "POST") return json({ ok: false }, 405);
       try { return await handleLead(req, env); } catch (e) { console.log("lead error", e && e.stack); return json({ ok: false, error: "server" }, 500); }
     }
-    return env.ASSETS.fetch(req);
+    if (url.hostname.startsWith("www.")) {
+      url.hostname = url.hostname.slice(4);
+      return Response.redirect(url.toString(), 301);
+    }
+    const res = await env.ASSETS.fetch(req);
+    if (res.status === 404 && (req.method === "GET" || req.method === "HEAD")) {
+      const to = oldRedirect(url.pathname);
+      if (to && to !== url.pathname) return Response.redirect(url.origin + to, 301);
+    }
+    return res;
   }
 };
