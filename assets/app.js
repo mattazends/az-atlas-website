@@ -54,7 +54,7 @@ const IMG={
 };
 const IMGW={"barafter2":484,"barbefore":967,"bath1":1160,"bath2":860,"bath3":574,"bath4":645,"bath5":645,"bath6":645,"bath8":645,"blockhome":860,"bobcat":652,"buildframe":1160,"cabbar":860,"coastal":645,"comframe":860,"crewgarage":645,"crewladder":645,"crewroof":1061,"deckafter2":688,"deckbefore":1160,"deckwork":696,"door":860,"g1":1056,"g2":1024,"g3":1158,"g4":870,"intframe":645,"kit1":860,"kit2":1160,"kit3":573,"kit4":574,"kitbefore":870,"logo":510,"pbar":360,"pbath":360,"porchdone":860,"porchframe":645,"shinglebefore":870,"shopstucco":645,"sign":806,"stuccolath":1061,"stuccopatio":645,"tileafter":759,"tilebefore":860,"tower":878,"truck":870};
 const URLS={"custom-homes":"/custom-homes-tucson/","additions-casitas":"/home-additions-casitas-tucson/","framing":"/framing-contractor-tucson/","structural":"/structural-repair-tucson/","stucco":"/stucco-contractor-tucson/","roofing":"/roofing-tucson/","remodeling":"/home-remodeling-tucson/","bathrooms":"/bathroom-remodel-tucson/","decks":"/deck-builder-tucson/","cabinets":"/custom-cabinets-tucson/"};
-const PAGE=document.body.dataset.slug||"",HOME=!PAGE;
+const PAGE=document.body.dataset.slug||"",ART=document.body.dataset.art||"",HOME=!PAGE&&!ART;
 
 const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg>';
@@ -141,7 +141,7 @@ const STORY=[["g1","Rotted beam exposed","Water damage found behind the stucco a
 
 const GALLERY=[["builddone","Homes","Finished custom home"],["kit2","Kitchens","Walnut kitchen with waterfall island"],["bath1","Bathrooms","Freestanding tub & feature wall"],["crewroof","Roofing","Tile re-roof underway"],["stuccodone","Stucco","Full stucco re-side"],["barafter2","Kitchens","Lit marble wet bar"],["tower","Homes","Custom home entry tower"],["bath4","Bathrooms","Double vanity & walk-in shower"],["deckafter","Decks","New deck & covered section"],["@bar","Kitchens","Wet bar walkthrough"],["kit1","Kitchens","Island & feature hood"],["shingleafter","Roofing","New shingle roof"],["bath3","Bathrooms","Walk-in shower with bench"],["coastal","Homes","Three-story modern build"],["kit3","Kitchens","Waterfall island & beams"],["g3","Structural","Garage beam rebuilt & sheathed"],["bath2","Bathrooms","Primary bath"],["shopstucco","Stucco","Commercial stucco"],["deckafter2","Decks","Redwood-tone deck"],["blockhome","Homes","Block home & tile roof"],["bath5","Bathrooms","Marble-look shower & black fixtures"],["kit4","Kitchens","Fluted island & walnut cabinets"],["tileafter","Roofing","Tile roof repair"],["intframe","Framing","Interior framing"],["bath6","Bathrooms","Tub & rain shower"],["cabbar","Kitchens","Black cabinet bar"],["comframe","Framing","Commercial framing"],["bath8","Bathrooms","Green tile & walnut vanity"],["door","Repairs","Door replacement"],["deckwork","Decks","Deck rebuild"],["bobcat","Homes","Custom home under construction"]];
 
-const FAQ=[["Do you take on small repair jobs?","Yes. Repairs and smaller improvements are a big part of what we do. Whether it's a roof leak, a stucco crack, a few rotted deck boards or a cabinet that won't close, send us the details and we'll help."],["Can you build a casita or addition on my property?","That's one of our main areas. Tell us about your property and what you want the space for, and we'll walk the site with you and talk through what's involved and the next steps."],["Are you licensed?","Yes. AZ Atlas Builder Group is a licensed general contractor with the Arizona Registrar of Contractors, license #344537. You can verify it on the ROC website."],["What areas do you serve?","We're based in Tucson and work throughout Tucson and the surrounding areas. If you're not sure we cover your location, just ask in the form."],["What should I include in my request?","A short description, your location and a few photos if you have them. Photos are especially helpful for repairs, so we can understand the job before we visit."]];
+const FAQ=[["Do you take on small repair jobs?","Yes. Repairs and smaller improvements are a big part of what we do. Whether it's a roof leak, a stucco crack, a few rotted deck boards or a cabinet that won't close, send us the details and we'll help."],["Can you build a casita or addition on my property?","That's one of our main areas. Tell us about your property and what you want the space for, and we'll walk the site with you and talk through what's involved and the next steps."],["Are you licensed?","Yes. AZ Atlas Builder Group is a licensed general contractor with the Arizona Registrar of Contractors, license #344537. You can verify it on the ROC website."],["What areas do you serve?","We're based in Tucson and work across the metro, including <a href=\"/contractor-oro-valley-az/\">Oro Valley</a>, <a href=\"/contractor-marana-az/\">Marana</a>, the <a href=\"/contractor-catalina-foothills-az/\">Catalina Foothills</a>, <a href=\"/contractor-vail-az/\">Vail</a> and <a href=\"/contractor-sahuarita-green-valley-az/\">Sahuarita and Green Valley</a>. If you're not sure we cover your location, just ask in the form."],["What should I include in my request?","A short description, your location and a few photos if you have them. Photos are especially helpful for repairs, so we can understand the job before we visit."]];
 
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const imgIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){load(e.target);imgIO.unobserve(e.target)}}),{rootMargin:"600px 0px"});
@@ -322,6 +322,7 @@ const Form=(()=>{const state={step:0,service:null,size:null,timeline:null,budget
 })();
 
 /* ---------- service page ---------- */
+const KW={"custom-homes":"Custom home builder in Tucson, AZ","additions-casitas":"Casita builders &amp; home additions in Tucson, AZ","framing":"Framing contractor in Tucson, AZ","structural":"Structural repair contractor in Tucson, AZ","stucco":"Stucco repair &amp; stucco contractor in Tucson, AZ","roofing":"Roof repair &amp; replacement in Tucson, AZ","remodeling":"Home remodeling &amp; renovation in Tucson, AZ","bathrooms":"Bathroom &amp; shower remodeling in Tucson, AZ","decks":"Deck builder &amp; deck repair in Tucson, AZ","cabinets":"Custom cabinets in Tucson, AZ"};
 function renderService(slug){const s=SVC[slug];if(!s)return false;
  const lvl=n=>`<div class="lvl">${[1,2,3].map(i=>`<i class="${i<=n?"f":""}"></i>`).join("")}</div>`;
  const others=SERVICES.filter(x=>x.slug!==slug);
@@ -329,7 +330,7 @@ function renderService(slug){const s=SVC[slug];if(!s)return false;
  $("#svc-view").innerHTML=`
  <section class="sp-hero"><div class="bg">${im(s.hero,s.name)}</div><div class="wrap">
   <div class="crumbs"><a href="/" data-home>Home</a><span>/</span><a href="#services" data-scroll="services">Services</a><span>/</span><span style="color:#fff">${s.short}</span></div>
-  <h1>${s.h1}</h1><p class="sub">${s.sub}</p>
+  <h1 class="kick">${KW[slug]||s.name}</h1><p class="big">${s.h1}</p><p class="sub">${s.sub}</p>
   <div class="row"><a class="btn btn-red" href="#sp-form" data-jump>${s.cta} ${ARROW}</a><a class="callink" data-tel><span class="lbl">Call</span> <span data-phone></span></a></div>
   </div></section>
  <section class="sec" style="background:var(--paper)"><div class="wrap">
@@ -353,11 +354,16 @@ function renderService(slug){const s=SVC[slug];if(!s)return false;
  Form.mount($("#formSvc"),slug);
  observe($("#svc-view"));return true}
 
+function renderArt(){const v=$("#svc-view");document.body.classList.add("on-svc");setImgs(v);setContacts(v);
+ const f=$("#formSvc");if(f)Form.mount(f,SVC[ART]?ART:null);
+ v.addEventListener("click",e=>{const b=e.target.closest(".qa>button");if(!b)return;const qa=b.parentElement,o=!qa.classList.contains("open");$$(".qa",v).forEach(x=>x.classList.remove("open"));if(o)qa.classList.add("open")});
+ observe(v)}
 /* ---------- router & clicks ---------- */
 let pendingScroll=null;
 addEventListener("hashchange",()=>{const m=location.hash.match(/^#\/service\/([\w-]+)/);if(m&&URLS[m[1]])location.replace(URLS[m[1]])});
 function route(){
  if(PAGE){renderService(PAGE);document.body.classList.add("on-svc")}
+ else if(ART){renderArt()}
  else{const m=location.hash.match(/^#\/service\/([\w-]+)/);if(m&&URLS[m[1]]){location.replace(URLS[m[1]]);return}
   Form.mount($("#formHome"));const qs=new URLSearchParams(location.search),pr=qs.get("preset");if(pr){Form.preset(pr);history.replaceState(null,"","/"+location.hash)}
   const h=location.hash.slice(1);if(h&&document.getElementById(h))setTimeout(()=>scrollToId(h),400)}
@@ -365,7 +371,7 @@ function route(){
 function scrollToId(id){const t=(id==="estimate"&&innerWidth<1080&&$("#formHome"))?$("#formHome"):document.getElementById(id);if(t&&t.id==="formHome"){window.scrollTo({top:t.getBoundingClientRect().top+scrollY-70,behavior:"smooth"});return}if(!t)return;window.scrollTo({top:t.getBoundingClientRect().top+scrollY-(id==="estimate"?64:56),behavior:"smooth"})}
 document.addEventListener("click",e=>{const a=e.target.closest("a,button");if(!a)return;
  if(a.hasAttribute("data-scroll")){e.preventDefault();const id=a.dataset.scroll,pre=a.dataset.preset;if(pre&&!document.body.classList.contains("on-svc"))Form.preset(pre);
-  if(PAGE){if(id==="estimate"&&!pre&&$("#sp-form")){$("#sp-form").scrollIntoView({behavior:"smooth"});closeMenu();return}location.href="/"+(pre?"?preset="+pre:"")+"#"+id;return}
+  if(PAGE||ART){if(id==="estimate"&&!pre&&$("#sp-form")){$("#sp-form").scrollIntoView({behavior:"smooth"});closeMenu();return}location.href="/"+(pre?"?preset="+pre:"")+"#"+id;return}
   else{scrollToId(id);closeMenu()}return}
  if(a.hasAttribute("data-jump")){e.preventDefault();$("#sp-form").scrollIntoView({behavior:"smooth"});return}
  if(a.hasAttribute("data-home")&&HOME){e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});history.replaceState(null,"","/");closeMenu();return}});
