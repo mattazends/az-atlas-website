@@ -1,4 +1,5 @@
-// AZ Atlas Builder Group: serves the static site and emails estimate requests via Resend.
+// AZ Atlas Builder Group: serves the static site, emails estimate requests via Resend
+// and hands each request to the AZ Atlas portal so it lands as a job card.
 const MAX_FILES = 8, MAX_TOTAL = 30 * 1024 * 1024;
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json" } });
@@ -9,7 +10,33 @@ function b64(buf) {
   return btoa(s);
 }
 
-async function handleLead(req, env) {
+const IMG = /^image\/(jpeg|jpg|png|webp|heic|heif|gif)$/;
+
+// Sends the lead (and its photos) to the portal. Runs after the visitor already has their answer,
+// and the email above is the backup, so a portal hiccup never loses a lead.
+async function sendToPortal(env, lead, files) {
+  if (!env.CRM_LEAD_URL) return false;
+  const post = async body => {
+    const r = await fetch(env.CRM_LEAD_URL, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    return r.json().catch(() => ({}));
+  };
+  const photos = [];
+  for (const f of files) {
+    if (!IMG.test(f.type)) continue;
+    try { const j = await post({ action: "upload", name: f.filename, type: f.type, data: f.content }); if (j && j.url) photos.push(j.url); }
+    catch (e) { console.log("portal photo upload failed", e && e.message); }
+  }
+  const extra = [["Project size", lead.size], ["3D design", lead.design]].filter(r => r[1]).map(r => r[0] + ": " + r[1]).join("\n");
+  const j = await post({
+    action: "submit", name: lead.name, phone: lead.phone, email: lead.email, location: lead.location,
+    service: lead.service, source: "Website", page: lead.source, budget: lead.budget, timeline: lead.timeline,
+    notes: [lead.description, extra].filter(Boolean).join("\n\n"), photos
+  });
+  if (!j || !j.ok) { console.log("portal lead failed", JSON.stringify(j).slice(0, 300)); return false; }
+  return true;
+}
+
+async function handleLead(req, env, ctx) {
   if (!env.RESEND_API_KEY || !env.LEAD_TO) return json({ ok: false, error: "not_configured" }, 500);
   let fd;
   try { fd = await req.formData(); } catch { return json({ ok: false, error: "bad_request" }, 400); }
@@ -27,7 +54,7 @@ async function handleLead(req, env) {
     if (!file || typeof file === "string" || !file.size) continue;
     if (total + file.size > MAX_TOTAL) break;
     total += file.size;
-    attachments.push({ filename: (file.name || "photo.jpg").replace(/[^\w.\-]/g, "_"), content: b64(await file.arrayBuffer()) });
+    attachments.push({ filename: (file.name || "photo.jpg").replace(/[^\w.\-]/g, "_"), content: b64(await file.arrayBuffer()), type: (file.type || "").toLowerCase() });
   }
 
   const rows = [["Name", lead.name], ["Phone", lead.phone], ["Email", lead.email], ["Project location", lead.location],
@@ -51,10 +78,17 @@ async function handleLead(req, env) {
       from: env.LEAD_FROM || "AZ Atlas Website <website@azatlasbuilder.com>",
       to: env.LEAD_TO.split(",").map(s => s.trim()).filter(Boolean),
       reply_to: lead.email, subject: `New estimate request: ${lead.service} (${lead.location || "Tucson"})`,
-      html, text, attachments
+      html, text, attachments: attachments.map(({ filename, content }) => ({ filename, content }))
     })
   });
-  if (!r.ok) { console.log("resend error", r.status, await r.text()); return json({ ok: false, error: "send_failed" }, 502); }
+  const portal = sendToPortal(env, lead, attachments).catch(e => { console.log("portal error", e && e.stack); return false; });
+  if (ctx && ctx.waitUntil) ctx.waitUntil(portal);
+  if (!r.ok) {
+    console.log("resend error", r.status, await r.text());
+    // Email failed but the portal may still take it, so wait for that before answering.
+    if (await portal) return json({ ok: true });
+    return json({ ok: false, error: "send_failed" }, 502);
+  }
   return json({ ok: true });
 }
 
@@ -109,11 +143,11 @@ function oldRedirect(path) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (url.pathname === "/api/lead") {
       if (req.method !== "POST") return json({ ok: false }, 405);
-      try { return await handleLead(req, env); } catch (e) { console.log("lead error", e && e.stack); return json({ ok: false, error: "server" }, 500); }
+      try { return await handleLead(req, env, ctx); } catch (e) { console.log("lead error", e && e.stack); return json({ ok: false, error: "server" }, 500); }
     }
     if (url.hostname.startsWith("www.")) {
       url.hostname = url.hostname.slice(4);
